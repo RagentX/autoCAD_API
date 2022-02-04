@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Interop;
 using Autodesk.AutoCAD.Interop.Common;
 using Autodesk.AutoCAD;
+using System.IO;
+
 namespace test2
 {
     public class Startup
@@ -17,7 +19,7 @@ namespace test2
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         static AcadApplication acad = null;
-
+        static string path = Directory.GetParent(Directory.GetParent(Directory.GetCurrentDirectory()).FullName).FullName + @"\";
         public void ConfigureServices(IServiceCollection services)
         {
         }
@@ -76,7 +78,7 @@ namespace test2
                 {
                     doc.ActiveSpace = AcActiveSpace.acModelSpace;
                     Double[] t1 = { 100, 100, 0 };
-                    AcadBlockReference block = doc.ModelSpace.InsertBlock(t1, @"C:\a\DB\data.dwg", 1, 1, 1, 0);
+                    AcadBlockReference block = doc.ModelSpace.InsertBlock(t1, path + @"DB\data.dwg", 1, 1, 1, 0);
                     //block.Delete();
                     AcadBlockReference block1 = doc.ModelSpace.InsertBlock(t1, name, 1, 1, 1, 0);
                     //var att = block1.GetAttributes();
@@ -87,7 +89,7 @@ namespace test2
                         atr = (AcadAttributeReference)a[i];
                         atr.TextString = par[i];
                     }
-                    doc.SaveAs(@"C:\a\testApi.dwg");
+                    //doc.SaveAs(@"..\..\..\..\testApi.dwg");
 
                     var acPlotCfg = doc.PlotConfigurations;
                     acPlotCfg.Add("PDF", true); // If second parameter is not true, exception is caused by acDoc.ActiveLayout.CopyFrom(PlotConfig);
@@ -111,7 +113,7 @@ namespace test2
                     doc.SetVariable("BACKGROUNDPLOT", 1);
                     doc.Plot.QuietErrorMode = true;
                     doc.Plot.NumberOfCopies = 1;
-                    doc.Plot.PlotToFile(@"C:\a\testApi.pdf", PlotConfig.ConfigName);
+                    doc.Plot.PlotToFile(path + @"testApi.pdf", PlotConfig.ConfigName);
                     
 
 
@@ -122,7 +124,7 @@ namespace test2
                 }
                 finally
                 {
-                    doc.SaveAs(@"C:\a\testApi.dwg");
+                    doc.SaveAs(path + @"testApi.dwg");
                     doc.Close();
                     await context.Response.WriteAsync("<p>gg</p>");
                 }
@@ -142,7 +144,7 @@ namespace test2
         {
             app.Run(async context =>
             {
-                await context.Response.WriteAsync("About");
+                await context.Response.WriteAsync(path + @"DB\data.dwg");
             });
         }
     }

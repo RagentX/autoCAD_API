@@ -33,7 +33,6 @@ namespace ClientClap
             Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(filename, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); //открыть файл
             Excel.Worksheet ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1]; //получить 1 лист
             var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);//1 ячейку
-            //string[,] list = new string[lastCell.Column, lastCell.Row]; // массив значений с листа равен по размеру листу
             int asme = Convert.ToInt32(ObjWorkSheet.Cells[26,9].Text.ToString());//считываем текст в строку
             int DN = Convert.ToInt32(ObjWorkSheet.Cells[26, 11].Text.ToString());//считываем текст в строку
             string form = ObjWorkSheet.Cells[26, 10].Text.ToString();//считываем текст в строку
@@ -42,12 +41,10 @@ namespace ClientClap
             GC.Collect(); // убрать за собой
             int[] values = { 20, 25, 40, 50, 80, 100, 150, 200 };
             string[] parClap = getData(Array.IndexOf(values,DN),form.ToLower(),asme);
-            
-            
-
-
+            //MessageBox.Show(parClap[0]);
             string s = await RequestAsync(parClap);
             MessageBox.Show(s);
+            
 
         }
         private async Task<String> RequestAsync(string[] parClap)
@@ -84,9 +81,9 @@ namespace ClientClap
 
         public static string[] getData(int value, string form, int class_asme)
         {
-            string[][] dataMassCsvFileA = getDataFromCSV(@"C:\a\bred\A.csv");
-            string[][] dataMassCsvFileB = getDataFromCSV(@"C:\a\bred\B.csv");
-            string[][] dataMassCsvFileC = getDataFromCSV(@"C:\a\bred\C.csv");
+            string[][] dataMassCsvFileA = getDataFromCSV(@"..\..\..\..\csvFiles\A.csv");
+            string[][] dataMassCsvFileB = getDataFromCSV(@"..\..\..\..\csvFiles\B.csv");
+            string[][] dataMassCsvFileC = getDataFromCSV(@"..\..\..\..\csvFiles\C.csv");
 
 
             for (int i = 0; i < dataMassCsvFileA.GetLength(0); i++)
