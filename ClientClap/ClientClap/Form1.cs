@@ -42,7 +42,7 @@ namespace ClientClap
             GC.Collect(); // убрать за собой
             int[] values = { 20, 25, 40, 50, 80, 100, 150, 200 };
             string[] parClap = getData(Array.IndexOf(values,DN),form.ToLower(),asme);
-            //MessageBox.Show($"https://localhost:44394/Index?klap_par={parClap[0]},{parClap[1]},{parClap[2]}&klap=Клапан");
+            
             
 
 
