@@ -28,28 +28,48 @@ namespace ClientClap
             // получаем выбранный файл
             string filename = openFileDialog1.FileName;
             Excel.Application ObjWorkExcel = new Excel.Application(); //открыть эксель
-            
+
+            string[] ram_par = {    "Масса, кг: ", "Заказчик: ", "Потребитель: ", "Установка: ", "Позиция: ",
+                                    "Модель привода: ", "Модель клапана: " , "Размер: DN " , "присоединение: PN " , "ХЗ1",
+                                    "ХЗ2", "ХЗ3" , "ХЗ4" , "ХЗ5" , "ХЗ6"   };
             
             Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(filename, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); //открыть файл
-            Excel.Worksheet ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1]; //получить 1 лист
-            var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);//1 ячейку
-            int asme = Convert.ToInt32(ObjWorkSheet.Cells[26,9].Text.ToString());//считываем текст в строку
-            int DN = Convert.ToInt32(ObjWorkSheet.Cells[26, 11].Text.ToString());//считываем текст в строку
-            string form = ObjWorkSheet.Cells[26, 10].Text.ToString();//считываем текст в строку
-            ObjWorkBook.Close(false, Type.Missing, Type.Missing); //закрыть не сохраняя
-            ObjWorkExcel.Quit(); // выйти из экселя
-            GC.Collect(); // убрать за собой
+            Excel.Worksheet ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1]; 
+            var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);
+            int asme = Convert.ToInt32(ObjWorkSheet.Cells[26,9].Text.ToString());
+            int DN = Convert.ToInt32(ObjWorkSheet.Cells[26, 11].Text.ToString());
+            string form = ObjWorkSheet.Cells[26, 10].Text.ToString();
+
+            ram_par[1] += ObjWorkSheet.Cells[2, 3].Text.ToString();
+            ram_par[2] += ObjWorkSheet.Cells[3, 3].Text.ToString();
+            ram_par[3] += ObjWorkSheet.Cells[5, 3].Text.ToString();
+            ram_par[5] += ObjWorkSheet.Cells[26, 18].Text.ToString();
+            ram_par[6] += ObjWorkSheet.Cells[26, 4].Text.ToString();
+            ram_par[7] += ObjWorkSheet.Cells[26, 11].Text.ToString();
+            ram_par[8] += ObjWorkSheet.Cells[26, 8].Text.ToString();
+
+            ObjWorkBook.Close(false, Type.Missing, Type.Missing); 
+            ObjWorkExcel.Quit(); 
+            GC.Collect(); 
             int[] values = { 20, 25, 40, 50, 80, 100, 150, 200 };
             string[] parClap = getData(Array.IndexOf(values,DN),form.ToLower(),asme);
             //MessageBox.Show(parClap[0]);
-            string s = await RequestAsync(parClap);
+            string ram_par_str = "";
+            foreach (string i in ram_par)
+            {
+                ram_par_str += i + ";";
+            }
+            
+            ram_par_str.Trim(';');
+            //MessageBox.Show(ram_par_str);
+            string s = await RequestAsync(parClap, ram_par_str) ;
             MessageBox.Show(s);
             
 
         }
-        private async Task<String> RequestAsync(string[] parClap)
+        private async Task<String> RequestAsync(string[] parClap , string ram_par)
         {
-            string url = $"https://localhost:44394/Index?klap_par={parClap[0]},{parClap[1]},{parClap[2]}&klap=Клапан";
+            string url = $"https://localhost:44394/Index?klap_par={parClap[0]};{parClap[1]};{parClap[2]}&klap=Клапан_мини&ram_par={ram_par}";
             WebRequest request = WebRequest.Create(url);
             WebResponse response = await request.GetResponseAsync().ConfigureAwait(true);
             Stream stream = response.GetResponseStream();
