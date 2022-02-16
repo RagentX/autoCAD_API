@@ -111,17 +111,18 @@ namespace test2
                     acPlotCfg.Add("PDF", true); // If second parameter is not true, exception is caused by acDoc.ActiveLayout.CopyFrom(PlotConfig);
                     AcadPlotConfiguration PlotConfig = acPlotCfg.Item("PDF");
                     
-                    PlotConfig.ConfigName = "DWG To PDF.pc3";
-                    PlotConfig.CanonicalMediaName = "ISO_A4_(297.00_x_210.00_MM)";
+                    PlotConfig.ConfigName = "AutoCAD PDF (General Documentation).pc3";
+                    PlotConfig.CanonicalMediaName = "ISO_full_bleed_A4_(210.00_x_297.00_MM)";
                     PlotConfig.PlotHidden = false;
-                    PlotConfig.StandardScale = AcPlotScale.acScaleToFit;
+                    PlotConfig.StandardScale = AcPlotScale.ac1_1;
                     PlotConfig.PlotType = AcPlotType.acLimits;
                     PlotConfig.PaperUnits = AcPlotPaperUnits.acMillimeters;
-                    PlotConfig.PlotRotation = AcPlotRotation.ac90degrees;
+                    PlotConfig.PlotRotation = AcPlotRotation.ac0degrees;
                     PlotConfig.CenterPlot = true;
-                    PlotConfig.PlotOrigin = new double[2] { 0, 0 };
+                    PlotConfig.PlotOrigin = new double[2] { 12.5 , 5 };
                     PlotConfig.PlotWithLineweights = false;
                     PlotConfig.PlotWithPlotStyles = false;
+                    
                     //PlotConfig.StyleSheet = "acad.ctb";
                     PlotConfig.RefreshPlotDeviceInfo();
                     

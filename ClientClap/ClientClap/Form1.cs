@@ -69,7 +69,7 @@ namespace ClientClap
         }
         private async Task<String> RequestAsync(string[] parClap , string ram_par)
         {
-            string url = $"https://localhost:44394/Index?klap_par={parClap[0]};{parClap[1]};{parClap[2]}&klap=Клапан_мини&ram_par={ram_par}";
+            string url = $"https://localhost:44394/Index?klap_par={parClap[0]};{parClap[1]};{parClap[2]}&klap=Клапан&ram_par={ram_par}";
             WebRequest request = WebRequest.Create(url);
             WebResponse response = await request.GetResponseAsync().ConfigureAwait(true);
             Stream stream = response.GetResponseStream();
