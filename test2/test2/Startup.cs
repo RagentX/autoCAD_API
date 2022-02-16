@@ -49,7 +49,12 @@ namespace test2
                 String[] par = null;
                 if (context.Request.Query.ContainsKey("klap_par"))
                 {
-                    par = context.Request.Query["klap_par"].ToString().Split(',');
+                    par = context.Request.Query["klap_par"].ToString().Split(';');
+                }
+                String[] ram_par = null;
+                if (context.Request.Query.ContainsKey("ram_par"))
+                {
+                    ram_par = context.Request.Query["ram_par"].ToString().Split(';');
                 }
                 await context.Response.WriteAsync("<p>Hello world!</p>");
                 
@@ -77,18 +82,29 @@ namespace test2
                 try
                 {
                     doc.ActiveSpace = AcActiveSpace.acModelSpace;
-                    Double[] t1 = { 100, 100, 0 };
-                    AcadBlockReference block = doc.ModelSpace.InsertBlock(t1, path + @"DB\data.dwg", 1, 1, 1, 0);
+                    AcadBlockReference block = doc.ModelSpace.InsertBlock(new double[] { 100, 100, 0 }, path + @"DB\data.dwg", 1, 1, 1, 0);
                     //block.Delete();
-                    AcadBlockReference block1 = doc.ModelSpace.InsertBlock(t1, name, 1, 1, 1, 0);
+                    AcadBlockReference block1 = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, name, 1, 1, 1, 0);
                     //var att = block1.GetAttributes();
-                    object[] a = (object[])block1.GetAttributes();
-                    for (int i = 0; i < a.Length; i++)
+                    object[] atrs1 = (object[])block1.GetAttributes();
+                    for (int i = 0; i < atrs1.Length; i++)
                     {
                         AcadAttributeReference atr;
-                        atr = (AcadAttributeReference)a[i];
+                        atr = (AcadAttributeReference)atrs1[i];
                         atr.TextString = par[i];
                     }
+                    AcadBlockReference block2 = doc.ModelSpace.InsertBlock(new double[] { 0, 0, 0 }, "Рамка", 1, 1, 1, 0);
+                    //var att = block1.GetAttributes();
+                    object[] atrs2 = (object[])block2.GetAttributes();
+                    await context.Response.WriteAsync(atrs2.Length.ToString() + "<Br>");
+                    for (int i = 0; i < atrs2.Length; i++)
+                    {
+                        AcadAttributeReference atr;
+                        atr = (AcadAttributeReference)atrs2[i];
+                        atr.TextString = ram_par[i];
+                        await context.Response.WriteAsync(ram_par[i] + "<Br>");
+                    }
+                    AcadBlockReference block3 = doc.ModelSpace.InsertBlock(new double[] { 150 , 150 , 0 }, "Клапан_слева", 1, 1, 1, 0);
                     //doc.SaveAs(@"..\..\..\..\testApi.dwg");
 
                     var acPlotCfg = doc.PlotConfigurations;

@@ -8,19 +8,19 @@
     "net5.0": []
   },
   "packageFolders": {
-    "C:\\Users\\ragentX\\.nuget\\packages\\": {}
+    "C:\\Users\\user\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ragentX\\Desktop\\autoCAD\\test2\\test2\\test2.csproj",
+      "projectUniqueName": "C:\\Users\\user\\Desktop\\CAD-API\\autoCAD_API\\test2\\test2\\test2.csproj",
       "projectName": "test2",
-      "projectPath": "C:\\Users\\ragentX\\Desktop\\autoCAD\\test2\\test2\\test2.csproj",
-      "packagesPath": "C:\\Users\\ragentX\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ragentX\\Desktop\\autoCAD\\test2\\test2\\obj\\",
+      "projectPath": "C:\\Users\\user\\Desktop\\CAD-API\\autoCAD_API\\test2\\test2\\test2.csproj",
+      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\user\\Desktop\\CAD-API\\autoCAD_API\\test2\\test2\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\ragentX\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -63,7 +63,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.102\\RuntimeIdentifierGraph.json"
       }
     }
   }

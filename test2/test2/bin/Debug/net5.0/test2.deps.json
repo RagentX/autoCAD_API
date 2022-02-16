@@ -330,7 +330,7 @@
         "runtime": {
           "Autodesk.AutoCAD.Interop.Common.dll": {
             "assemblyVersion": "22.0.0.0",
-            "fileVersion": "22.0.154.0"
+            "fileVersion": "22.0.161.0"
           }
         },
         "compile": {
@@ -341,7 +341,7 @@
         "runtime": {
           "Autodesk.AutoCAD.Interop.dll": {
             "assemblyVersion": "22.0.0.0",
-            "fileVersion": "22.0.154.0"
+            "fileVersion": "22.0.161.0"
           }
         },
         "compile": {
