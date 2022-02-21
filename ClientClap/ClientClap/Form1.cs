@@ -39,6 +39,7 @@ namespace ClientClap
             int asme = Convert.ToInt32(ObjWorkSheet.Cells[26,9].Text.ToString());
             int DN = Convert.ToInt32(ObjWorkSheet.Cells[26, 11].Text.ToString());
             string form = ObjWorkSheet.Cells[26, 10].Text.ToString();
+            string[] priv = ObjWorkSheet.Cells[26, 18].Text.ToString().Split('/');
 
             ram_par[1] += ObjWorkSheet.Cells[2, 3].Text.ToString();
             ram_par[2] += ObjWorkSheet.Cells[3, 3].Text.ToString();
@@ -48,11 +49,16 @@ namespace ClientClap
             ram_par[7] += ObjWorkSheet.Cells[26, 11].Text.ToString();
             ram_par[8] += ObjWorkSheet.Cells[26, 8].Text.ToString();
 
+
+
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); 
             ObjWorkExcel.Quit(); 
             GC.Collect(); 
             int[] values = { 20, 25, 40, 50, 80, 100, 150, 200 };
-            string[] parClap = getData(Array.IndexOf(values,DN),form.ToLower(),asme);
+            string parClap = getData(Array.IndexOf(values,DN),form.ToLower(),asme);
+            bool privPar = false;
+            if (priv[0] == "88") privPar = true;
+            ram_par[0] += (getWeight(Array.IndexOf(values, DN), asme)+getWeightPriv(Convert.ToInt32(priv[1]),false)).ToString();
             //MessageBox.Show(parClap[0]);
             string ram_par_str = "";
             foreach (string i in ram_par)
@@ -62,14 +68,14 @@ namespace ClientClap
             
             ram_par_str.Trim(';');
             //MessageBox.Show(ram_par_str);
-            string s = await RequestAsync(parClap, ram_par_str) ;
+            string s = await RequestAsync(parClap, ram_par_str, getDataPriv(Convert.ToInt32(priv[1]), privPar)) ;
             MessageBox.Show(s);
             
 
         }
-        private async Task<String> RequestAsync(string[] parClap , string ram_par)
+        private async Task<String> RequestAsync(string parClap , string ram_par, string priv_par)
         {
-            string url = $"https://localhost:44394/Index?klap_par={parClap[0]};{parClap[1]};{parClap[2]}&klap=Клапан&ram_par={ram_par}";
+            string url = $"https://localhost:44394/Index?klap_par={parClap}&klap=Клапан&ram_par={ram_par}&priv_par={priv_par}";
             WebRequest request = WebRequest.Create(url);
             WebResponse response = await request.GetResponseAsync().ConfigureAwait(true);
             Stream stream = response.GetResponseStream();
@@ -99,7 +105,7 @@ namespace ClientClap
         }
 
 
-        public static string[] getData(int value, string form, int class_asme)
+        public static string getData(int value, string form, int class_asme)
         {
             string[][] dataMassCsvFileA = getDataFromCSV(@"..\..\..\..\csvFiles\A.csv");
             string[][] dataMassCsvFileB = getDataFromCSV(@"..\..\..\..\csvFiles\B.csv");
@@ -147,26 +153,67 @@ namespace ClientClap
                     break;
                 }
             }
-            return new string[] { A.ToString(), B.ToString(), C.ToString() };
+            return $"{A.ToString()};{B.ToString()};{C.ToString()}";
+        }
+        public static string getDataPriv(int size, bool par)
+        {
+            int[] sizes = new int[] { 6, 10, 16, 23 };
+            int nomberSize = Array.IndexOf(sizes, size);
+            string[][] dataMassCsvFile = getDataFromCSV(@"..\..\..\..\csvFiles\Priv.csv");
+            int parSize = 2;
+            if (par) parSize++;
+            return  $"∅{dataMassCsvFile[1 + nomberSize][1]};" +
+                    $"{dataMassCsvFile[1 + nomberSize][parSize]};" +
+                    $"{dataMassCsvFile[1 + nomberSize][4]};" +
+                    $"{dataMassCsvFile[1 + nomberSize][5]}";
+
+        }
+        public static int getWeightPriv(int size, bool par)
+        {
+            int[] sizes = new int[] { 6, 10, 16, 23 };
+            int nomberSize = Array.IndexOf(sizes, size);
+            string[][] dataMassCsvFile = getDataFromCSV(@"..\..\..\..\csvFiles\weightsDimen.csv");
+            int parSize = 1;
+            if (par) parSize++;
+            return Convert.ToInt32( dataMassCsvFile[nomberSize+1][parSize] );
+
+        }
+        public static int getWeight(int value, int class_asme)
+        {
+            string[][] dataMassCsvFileA = getDataFromCSV(@"..\..\..\..\csvFiles\bredWeights.csv");
+            for (int i = 0; i < dataMassCsvFileA[0].GetLength(0); i++)
+            {
+                if (dataMassCsvFileA[0][i] == class_asme.ToString())
+                {
+                    return (Int32.Parse(dataMassCsvFileA[value + 1][i]));
+                }
+            }
+            return 0;
+
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+            label1.Text = getWeightPriv(6,true).ToString();
         }
         /*
-        private async void button1_Click(object sender, EventArgs e)
-        {
-            string s = await RequestAsync();
-            MessageBox.Show(s);
-        }
-        private async Task<String> RequestAsync()
-        {
-            string rez = "asf";
-            string url = "https://localhost:44394/Index?klap_par=25,35,15&klap=Клапан";
-            WebRequest request = WebRequest.Create(url);
-            WebResponse response = request.GetResponse();
-            Stream stream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(stream);
-            response.Close();
-            rez = reader.ReadToEnd();
-            return rez;
-        }*/
+private async void button1_Click(object sender, EventArgs e)
+{
+   string s = await RequestAsync();
+   MessageBox.Show(s);
+}
+private async Task<String> RequestAsync()
+{
+   string rez = "asf";
+   string url = "https://localhost:44394/Index?klap_par=25,35,15&klap=Клапан";
+   WebRequest request = WebRequest.Create(url);
+   WebResponse response = request.GetResponse();
+   Stream stream = response.GetResponseStream();
+   StreamReader reader = new StreamReader(stream);
+   response.Close();
+   rez = reader.ReadToEnd();
+   return rez;
+}*/
     }
     
 }

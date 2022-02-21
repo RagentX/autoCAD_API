@@ -55,6 +55,11 @@ namespace test2
                 if (context.Request.Query.ContainsKey("ram_par"))
                 {
                     ram_par = context.Request.Query["ram_par"].ToString().Split(';');
+                }           
+                String[] priv_par = null;
+                if (context.Request.Query.ContainsKey("priv_par"))
+                {
+                    priv_par = context.Request.Query["priv_par"].ToString().Split(';');
                 }
                 await context.Response.WriteAsync("<p>Hello world!</p>");
                 
@@ -106,6 +111,16 @@ namespace test2
                     }
                     AcadBlockReference block3 = doc.ModelSpace.InsertBlock(new double[] { 150 , 150 , 0 }, "Клапан_слева", 1, 1, 1, 0);
                     //doc.SaveAs(@"..\..\..\..\testApi.dwg");
+                    AcadBlockReference block4 = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "Привод", 1, 1, 1, 0);
+                    object[] atrs4 = (object[])block4.GetAttributes();
+                    await context.Response.WriteAsync(atrs4.Length.ToString() + "<Br>");
+                    for (int i = 0; i < atrs4.Length; i++)
+                    {
+                        AcadAttributeReference atr;
+                        atr = (AcadAttributeReference)atrs4[i];
+                        atr.TextString = priv_par[i];
+                        await context.Response.WriteAsync(priv_par[i] + "<Br>");
+                    }
 
                     var acPlotCfg = doc.PlotConfigurations;
                     acPlotCfg.Add("PDF", true); // If second parameter is not true, exception is caused by acDoc.ActiveLayout.CopyFrom(PlotConfig);
@@ -131,7 +146,6 @@ namespace test2
                     doc.Plot.QuietErrorMode = true;
                     doc.Plot.NumberOfCopies = 1;
                     doc.Plot.PlotToFile(path + @"testApi.pdf", PlotConfig.ConfigName);
-                    
 
 
                 }
