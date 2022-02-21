@@ -49,8 +49,36 @@ namespace ClientClap
             ram_par[7] += ObjWorkSheet.Cells[26, 11].Text.ToString();
             ram_par[8] += ObjWorkSheet.Cells[26, 8].Text.ToString();
 
+            int start = 1;
+            while(true)
+            {
+                if (ObjWorkSheet.Cells[start, 1].Text.ToString() == "ПРИНАДЛЕЖНОСТИ") break;
+                start++;
+            }
+            int fin = start;
+            while(true)
+            {
+                if (ObjWorkSheet.Cells[fin, 1].Text.ToString() == "") break;
+                fin++;
+            }
+            List<String> preParts = new List<string>();
+            int numberStr = 1;
+            for(int i = start+1; i < fin; i++)
+            {
+                string rez = ObjWorkSheet.Cells[i, 1].Text.ToString();
+                while(ObjWorkSheet.Cells[i + 1, 1].Text.ToString().IndexOf((numberStr+1).ToString()+". ") != 0 && i < fin)
+                {
+                    i++;
+                    rez += "\n" + ObjWorkSheet.Cells[i, 1].Text.ToString();
+                }
+                rez = rez.Substring(((numberStr).ToString() + ". ").Length);
+                numberStr++;
+                preParts.Add(rez);
+            }
+            String[] parts = preParts.ToArray();
+            preParts.Clear();
 
-
+            MessageBox.Show(start.ToString() + "," + fin.ToString());
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); 
             ObjWorkExcel.Quit(); 
             GC.Collect(); 
