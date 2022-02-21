@@ -69,15 +69,14 @@ namespace ClientClap
                 while(ObjWorkSheet.Cells[i + 1, 1].Text.ToString().IndexOf((numberStr+1).ToString()+". ") != 0 && i < fin)
                 {
                     i++;
-                    rez += "\n" + ObjWorkSheet.Cells[i, 1].Text.ToString();
+                    rez += " " + ObjWorkSheet.Cells[i, 1].Text.ToString();
                 }
                 rez = rez.Substring(((numberStr).ToString() + ". ").Length);
                 numberStr++;
-                preParts.Add(rez);
+                preParts.Add(rez.Replace("\"", ""));
             }
             String[] parts = preParts.ToArray();
             preParts.Clear();
-
             MessageBox.Show(start.ToString() + "," + fin.ToString());
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); 
             ObjWorkExcel.Quit(); 
@@ -221,8 +220,15 @@ namespace ClientClap
         }
         private void button2_Click(object sender, EventArgs e)
         {
+            string[][] dataMassCsvFile = getDataFromCSV(@"..\..\..\..\csvFiles\artParts.csv");
+            string a = "Электромеханические конечные выключатели открыто-закрыто модели 496-257, взрывозащита 1ExdIICT6/T5, не ниже IP65 кабельный ввод под диаметр 9,4...14,0 мм с креплением под металлорукав Р3-Ц-20/Р3-ЦХ-20/Р3-ЦП-20/Р3-Ц-ПВХ-20/МПГ-20/МРПИ-20/Герда-МГ-20";
+            List<String> b = new List<String>();
+            for(int i = 0; i < dataMassCsvFile.Length; i++)
+            {
+                b.Add(dataMassCsvFile[i][0].Replace("\"", ""));
+            }
 
-            label1.Text = getWeightPriv(6,true).ToString();
+            //label1.Text = (Array.IndexOf(b.ToArray(), a)).ToString();
         }
         /*
 private async void button1_Click(object sender, EventArgs e)
