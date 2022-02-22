@@ -48,7 +48,7 @@ namespace ClientClap
             ram_par[6] += ObjWorkSheet.Cells[26, 4].Text.ToString();
             ram_par[7] += ObjWorkSheet.Cells[26, 11].Text.ToString();
             ram_par[8] += ObjWorkSheet.Cells[26, 8].Text.ToString();
-
+            string[] numberPartsExcel = ObjWorkSheet.Cells[26, 28].Text.ToString().Split(',');
             int start = 1;
             while(true)
             {
@@ -61,7 +61,9 @@ namespace ClientClap
                 if (ObjWorkSheet.Cells[fin, 1].Text.ToString() == "") break;
                 fin++;
             }
-            List<String> preParts = new List<string>();
+
+            string frontParts = "";
+            string backParts = "";
             int numberStr = 1;
             for(int i = start+1; i < fin; i++)
             {
@@ -73,11 +75,17 @@ namespace ClientClap
                 }
                 rez = rez.Substring(((numberStr).ToString() + ". ").Length);
                 numberStr++;
-                preParts.Add(rez.Replace("\"", ""));
+                string numberPart = getFrontPart(rez.Replace("\"", ""));
+                if (numberPart != "0")
+                {
+                    frontParts += numberPart + ";";
+                }
+                numberPart = getBackPart(rez.Replace("\"", ""));
+                if (numberPart != "0")
+                {
+                    backParts += numberPart + ";";
+                }
             }
-            String[] parts = preParts.ToArray();
-            preParts.Clear();
-            MessageBox.Show(start.ToString() + "," + fin.ToString());
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); 
             ObjWorkExcel.Quit(); 
             GC.Collect(); 
@@ -86,7 +94,6 @@ namespace ClientClap
             bool privPar = false;
             if (priv[0] == "88") privPar = true;
             ram_par[0] += (getWeight(Array.IndexOf(values, DN), asme)+getWeightPriv(Convert.ToInt32(priv[1]),false)).ToString();
-            //MessageBox.Show(parClap[0]);
             string ram_par_str = "";
             foreach (string i in ram_par)
             {
@@ -94,15 +101,15 @@ namespace ClientClap
             }
             
             ram_par_str.Trim(';');
-            //MessageBox.Show(ram_par_str);
-            string s = await RequestAsync(parClap, ram_par_str, getDataPriv(Convert.ToInt32(priv[1]), privPar)) ;
+            string s = await RequestAsync(parClap, ram_par_str, getDataPriv(Convert.ToInt32(priv[1]), privPar),backParts.Trim(';'),frontParts.Trim(';')) ;
             MessageBox.Show(s);
             
 
         }
-        private async Task<String> RequestAsync(string parClap , string ram_par, string priv_par)
+        private async Task<String> RequestAsync(string parClap , string ram_par, string priv_par,string backParts, string frontParts)
         {
-            string url = $"https://localhost:44394/Index?klap_par={parClap}&klap=Клапан&ram_par={ram_par}&priv_par={priv_par}";
+            string url = $"https://localhost:44394/Index?klap_par={parClap}&klap=Клапан&ram_par={ram_par}&priv_par={priv_par}&"
+                +$"backParts={backParts}&frontParts={frontParts}";
             WebRequest request = WebRequest.Create(url);
             WebResponse response = await request.GetResponseAsync().ConfigureAwait(true);
             Stream stream = response.GetResponseStream();
@@ -218,6 +225,37 @@ namespace ClientClap
             return 0;
 
         }
+        public static string getFrontPart(string Part)
+        {
+            Part = Part.Replace("\"", "").Trim().ToLower();
+            string[][] dataMassCsvFileParts = getDataFromCSV(@"..\..\..\..\csvFiles\artFrontParts.csv");
+            List<String> parts = new List<String>();
+            List<String> numberPurts = new List<String>();
+            for (int i = 0; i < dataMassCsvFileParts.Length; i++)
+            {
+                parts.Add(dataMassCsvFileParts[i][0].Replace("\"", "").Trim().ToLower());
+                numberPurts.Add(dataMassCsvFileParts[i][1].Trim());
+            }
+            int a = Array.IndexOf(parts.ToArray(), Part);
+            if (a != -1) return numberPurts[a];
+            return "0";
+        }
+        public static string getBackPart(string Part)
+        {
+            Part = Part.Replace("\"", "").Trim().ToLower();
+            string[][] dataMassCsvFileParts = getDataFromCSV(@"..\..\..\..\csvFiles\artBackParts.csv");
+            List<String> parts = new List<String>();
+            List<String> numberPurts = new List<String>();
+            for (int i = 0; i < dataMassCsvFileParts.Length; i++)
+            {
+                parts.Add(dataMassCsvFileParts[i][0].Replace("\"", "").Trim().ToLower());
+                numberPurts.Add(dataMassCsvFileParts[i][1].Trim());
+            }
+            int a = Array.IndexOf(parts.ToArray(), Part);
+            if(a != -1) return numberPurts[a];
+            return "0";
+        }
+
         private void button2_Click(object sender, EventArgs e)
         {
             string[][] dataMassCsvFile = getDataFromCSV(@"..\..\..\..\csvFiles\artParts.csv");
@@ -228,7 +266,7 @@ namespace ClientClap
                 b.Add(dataMassCsvFile[i][0].Replace("\"", ""));
             }
 
-            //label1.Text = (Array.IndexOf(b.ToArray(), a)).ToString();
+            label1.Text = (Array.IndexOf(b.ToArray(), a)+1).ToString();
         }
         /*
 private async void button1_Click(object sender, EventArgs e)
