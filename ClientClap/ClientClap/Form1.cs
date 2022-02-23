@@ -23,6 +23,8 @@ namespace ClientClap
         }
         private async void button1_Click(object sender, EventArgs e)
         {
+            int numberString = 26;
+            string handString = "Ручной дублер";
             if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
                 return;
             // получаем выбранный файл
@@ -36,19 +38,20 @@ namespace ClientClap
             Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(filename, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); //открыть файл
             Excel.Worksheet ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1]; 
             var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);
-            int asme = Convert.ToInt32(ObjWorkSheet.Cells[26,9].Text.ToString());
-            int DN = Convert.ToInt32(ObjWorkSheet.Cells[26, 11].Text.ToString());
-            string form = ObjWorkSheet.Cells[26, 10].Text.ToString();
-            string[] priv = ObjWorkSheet.Cells[26, 18].Text.ToString().Split('/');
+            int asme = Convert.ToInt32(ObjWorkSheet.Cells[numberString, 9].Text.ToString());
+            int DN = Convert.ToInt32(ObjWorkSheet.Cells[numberString, 11].Text.ToString());
+            string form = ObjWorkSheet.Cells[numberString, 10].Text.ToString();
+            string[] priv = ObjWorkSheet.Cells[numberString, 18].Text.ToString().Split('/');
 
             ram_par[1] += ObjWorkSheet.Cells[2, 3].Text.ToString();
             ram_par[2] += ObjWorkSheet.Cells[3, 3].Text.ToString();
             ram_par[3] += ObjWorkSheet.Cells[5, 3].Text.ToString();
-            ram_par[5] += ObjWorkSheet.Cells[26, 18].Text.ToString();
-            ram_par[6] += ObjWorkSheet.Cells[26, 4].Text.ToString();
-            ram_par[7] += ObjWorkSheet.Cells[26, 11].Text.ToString();
-            ram_par[8] += ObjWorkSheet.Cells[26, 8].Text.ToString();
-            string[] numberPartsExcel = ObjWorkSheet.Cells[26, 28].Text.ToString().Split(',');
+            ram_par[5] += ObjWorkSheet.Cells[numberString, 18].Text.ToString();
+            ram_par[6] += ObjWorkSheet.Cells[numberString, 4].Text.ToString();
+            ram_par[7] += ObjWorkSheet.Cells[numberString, 11].Text.ToString();
+            ram_par[8] += ObjWorkSheet.Cells[numberString, 8].Text.ToString();
+            string[] numberPartsExcel = ObjWorkSheet.Cells[numberString, 28].Text.ToString().Split(',');
+
             int start = 1;
             while(true)
             {
@@ -64,6 +67,9 @@ namespace ClientClap
 
             string frontParts = "";
             string backParts = "";
+            string hand = "";
+            int mas = 0;
+            bool boolHand = false;
             int numberStr = 1;
             for(int i = start+1; i < fin; i++)
             {
@@ -71,20 +77,30 @@ namespace ClientClap
                 while(ObjWorkSheet.Cells[i + 1, 1].Text.ToString().IndexOf((numberStr+1).ToString()+". ") != 0 && i < fin)
                 {
                     i++;
-                    rez += " " + ObjWorkSheet.Cells[i, 1].Text.ToString();
+                    rez += " " + ObjWorkSheet.Cells[i, 1].Text.ToString().Replace("\"", "");
                 }
                 rez = rez.Substring(((numberStr).ToString() + ". ").Length);
+                if (Array.IndexOf(numberPartsExcel, numberStr.ToString()) != -1)
+                {
+                    string numberPart = getFrontPart(rez);
+                    if (numberPart != "0")
+                    {
+                        frontParts += numberPart + ";";
+                        mas += 5;
+                    }
+                    numberPart = getBackPart(rez);
+                    if (numberPart != "0")
+                    {
+                        backParts += numberPart + ";";
+                        mas += 5;
+                    }
+                    if( rez == handString)
+                    {
+                        hand = "5";
+                        boolHand = true;
+                    }
+                }
                 numberStr++;
-                string numberPart = getFrontPart(rez.Replace("\"", ""));
-                if (numberPart != "0")
-                {
-                    frontParts += numberPart + ";";
-                }
-                numberPart = getBackPart(rez.Replace("\"", ""));
-                if (numberPart != "0")
-                {
-                    backParts += numberPart + ";";
-                }
             }
             ObjWorkBook.Close(false, Type.Missing, Type.Missing); 
             ObjWorkExcel.Quit(); 
@@ -93,7 +109,7 @@ namespace ClientClap
             string parClap = getData(Array.IndexOf(values,DN),form.ToLower(),asme);
             bool privPar = false;
             if (priv[0] == "88") privPar = true;
-            ram_par[0] += (getWeight(Array.IndexOf(values, DN), asme)+getWeightPriv(Convert.ToInt32(priv[1]),false)).ToString();
+            ram_par[0] += (getWeight(Array.IndexOf(values, DN), asme)+getWeightPriv(Convert.ToInt32(priv[1]),boolHand) + mas).ToString();
             string ram_par_str = "";
             foreach (string i in ram_par)
             {
@@ -101,15 +117,15 @@ namespace ClientClap
             }
             
             ram_par_str.Trim(';');
-            string s = await RequestAsync(parClap, ram_par_str, getDataPriv(Convert.ToInt32(priv[1]), privPar),backParts.Trim(';'),frontParts.Trim(';')) ;
+            string s = await RequestAsync(hand, parClap, ram_par_str, getDataPriv(Convert.ToInt32(priv[1]), privPar),backParts.Trim(';'),frontParts.Trim(';')) ;
             MessageBox.Show(s);
             
 
         }
-        private async Task<String> RequestAsync(string parClap , string ram_par, string priv_par,string backParts, string frontParts)
+        private async Task<String> RequestAsync(string hand, string parClap , string ram_par, string priv_par,string backParts, string frontParts)
         {
             string url = $"https://localhost:44394/Index?klap_par={parClap}&klap=Клапан&ram_par={ram_par}&priv_par={priv_par}&"
-                +$"backParts={backParts}&frontParts={frontParts}";
+                +$"backParts={backParts}&frontParts={frontParts}&hand={hand}";
             WebRequest request = WebRequest.Create(url);
             WebResponse response = await request.GetResponseAsync().ConfigureAwait(true);
             Stream stream = response.GetResponseStream();
@@ -199,7 +215,7 @@ namespace ClientClap
             return  $"∅{dataMassCsvFile[1 + nomberSize][1]};" +
                     $"{dataMassCsvFile[1 + nomberSize][parSize]};" +
                     $"{dataMassCsvFile[1 + nomberSize][4]};" +
-                    $"{dataMassCsvFile[1 + nomberSize][5]}";
+                    $"∅{dataMassCsvFile[1 + nomberSize][5]}";
 
         }
         public static int getWeightPriv(int size, bool par)

@@ -35,10 +35,8 @@ namespace test2
                 await context.Response.WriteAsync("Page Not Found");
             });
         }
-
         private static void Index(IApplicationBuilder app)
         {
-            
             app.Use(async (context, next) =>
             {
                  String name = null;
@@ -71,6 +69,11 @@ namespace test2
                 {
                     frontParts = context.Request.Query["frontParts"].ToString().Split(';');
                 }
+                String[] hand = null;
+                if (context.Request.Query.ContainsKey("hand"))
+                {
+                    hand = context.Request.Query["hand"].ToString().Split(';');
+                }
                 await context.Response.WriteAsync("<p>Hello world!</p>");
                 
                 while (acad == null)
@@ -98,9 +101,7 @@ namespace test2
                 {
                     doc.ActiveSpace = AcActiveSpace.acModelSpace;
                     AcadBlockReference block = doc.ModelSpace.InsertBlock(new double[] { 100, 100, 0 }, path + @"DB\data.dwg", 1, 1, 1, 0);
-                    //block.Delete();
                     AcadBlockReference block2 = doc.ModelSpace.InsertBlock(new double[] { 0, 0, 0 }, "Рамка", 1, 1, 1, 0);
-                    //var att = block1.GetAttributes();
                     object[] atrs2 = (object[])block2.GetAttributes();
                     await context.Response.WriteAsync(atrs2.Length.ToString() + "<Br>");
                     for (int i = 0; i < atrs2.Length; i++)
@@ -110,12 +111,26 @@ namespace test2
                         atr.TextString = ram_par[i];
                         await context.Response.WriteAsync(ram_par[i] + "<Br>");
                     }
-                    foreach (string i in backParts)
+                    AcadBlockReference block6 = doc.ModelSpace.InsertBlock(new double[] { 150, 150, 0 }, "Привод_сбоку", 1, 1, 1, 0);
+                    if (hand != null)
                     {
-                        AcadBlockReference blockFor = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "part" + i, 1, 1, 1, 0);
+                        AcadBlockReference blockFor = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "part5", 1, 1, 1, 0);
+                        object[] atrsFor = (object[])blockFor.GetAttributes();
+                        await context.Response.WriteAsync(atrsFor.Length.ToString() + "<Br>");
+                        for (int i = 0; i < atrsFor.Length; i++)
+                        {
+                            AcadAttributeReference atr;
+                            atr = (AcadAttributeReference)atrsFor[i];
+                            atr.TextString = priv_par[i + 2];
+                            await context.Response.WriteAsync(priv_par[i+2] + "<Br>");
+                        }
                     }
+                    if(backParts != null)
+                        foreach (string i in backParts)
+                        {
+                            AcadBlockReference blockFor = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "part" + i, 1, 1, 1, 0);
+                        }
                     AcadBlockReference block1 = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, name, 1, 1, 1, 0);
-                    //var att = block1.GetAttributes();
                     object[] atrs1 = (object[])block1.GetAttributes();
                     for (int i = 0; i < atrs1.Length; i++)
                     {
@@ -123,10 +138,7 @@ namespace test2
                         atr = (AcadAttributeReference)atrs1[i];
                         atr.TextString = par[i];
                     }
-
-                    
                     AcadBlockReference block3 = doc.ModelSpace.InsertBlock(new double[] { 150 , 150 , 0 }, "Клапан_слева", 1, 1, 1, 0);
-                    //doc.SaveAs(@"..\..\..\..\testApi.dwg");
                     AcadBlockReference block4 = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "Привод", 1, 1, 1, 0);
                     object[] atrs4 = (object[])block4.GetAttributes();
                     await context.Response.WriteAsync(atrs4.Length.ToString() + "<Br>");
@@ -137,10 +149,11 @@ namespace test2
                         atr.TextString = priv_par[i];
                         await context.Response.WriteAsync(priv_par[i] + "<Br>");
                     }
-                    foreach (string i in frontParts)
-                    {
-                        AcadBlockReference blockFor = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "part" + i, 1, 1, 1, 0);
-                    }
+                    if (frontParts != null)
+                        foreach (string i in frontParts)
+                        {
+                            AcadBlockReference blockFor = doc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "part" + i, 1, 1, 1, 0);
+                        }
                     var acPlotCfg = doc.PlotConfigurations;
                     acPlotCfg.Add("PDF", true); // If second parameter is not true, exception is caused by acDoc.ActiveLayout.CopyFrom(PlotConfig);
                     AcadPlotConfiguration PlotConfig = acPlotCfg.Item("PDF");
@@ -156,17 +169,12 @@ namespace test2
                     PlotConfig.PlotOrigin = new double[2] { 12.5 , 5 };
                     PlotConfig.PlotWithLineweights = false;
                     PlotConfig.PlotWithPlotStyles = false;
-                    
-                    //PlotConfig.StyleSheet = "acad.ctb";
                     PlotConfig.RefreshPlotDeviceInfo();
-                    
                     doc.ActiveLayout.CopyFrom(PlotConfig); // Need to have this or resulting PDF does not seem to apply the PlotConfig.
                     doc.SetVariable("BACKGROUNDPLOT", 1);
                     doc.Plot.QuietErrorMode = true;
                     doc.Plot.NumberOfCopies = 1;
                     doc.Plot.PlotToFile(path + @"testApi.pdf", PlotConfig.ConfigName);
-
-
                 }
                 catch (Exception e)
                 {
@@ -178,16 +186,11 @@ namespace test2
                     doc.Close();
                     await context.Response.WriteAsync("<p>gg</p>");
                 }
-                
-
                 await next.Invoke();
             });
-            
-
             app.Run(async context =>
             {
                 await context.Response.WriteAsync("<p>fin</p>");
-
             });
         }
         private static void About(IApplicationBuilder app)
