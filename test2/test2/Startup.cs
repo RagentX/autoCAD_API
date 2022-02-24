@@ -39,7 +39,7 @@ namespace test2
         {
             app.Use(async (context, next) =>
             {
-                 String name = null;
+                String name = null;
                 if (context.Request.Query.ContainsKey("klap"))
                 {
                     name = context.Request.Query["klap"];
@@ -73,6 +73,11 @@ namespace test2
                 if (context.Request.Query.ContainsKey("hand"))
                 {
                     hand = context.Request.Query["hand"].ToString().Split(';');
+                }
+                String filename = null;
+                if (context.Request.Query.ContainsKey("filename"))
+                {
+                    filename = context.Request.Query["filename"];
                 }
                 await context.Response.WriteAsync("<p>Hello world!</p>");
                 
@@ -174,7 +179,7 @@ namespace test2
                     doc.SetVariable("BACKGROUNDPLOT", 1);
                     doc.Plot.QuietErrorMode = true;
                     doc.Plot.NumberOfCopies = 1;
-                    doc.Plot.PlotToFile(path + @"testApi.pdf", PlotConfig.ConfigName);
+                    doc.Plot.PlotToFile(path + filename + ".pdf", PlotConfig.ConfigName);
                 }
                 catch (Exception e)
                 {
@@ -182,7 +187,7 @@ namespace test2
                 }
                 finally
                 {
-                    doc.SaveAs(path + @"testApi.dwg");
+                    doc.SaveAs(path + filename + ".dwg");
                     doc.Close();
                     await context.Response.WriteAsync("<p>gg</p>");
                 }

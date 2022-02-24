@@ -16,116 +16,22 @@ namespace ClientClap
 {
     public partial class Form1 : Form
     {
-        
+        List<string> excelPar = new List<string>();
+        string filename;
         public Form1()
         {
             InitializeComponent();
         }
         private async void button1_Click(object sender, EventArgs e)
         {
-            int numberString = 26;
-            string handString = "Ручной дублер";
-            if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
-                return;
-            // получаем выбранный файл
-            string filename = openFileDialog1.FileName;
-            Excel.Application ObjWorkExcel = new Excel.Application(); //открыть эксель
 
-            string[] ram_par = {    "Масса, кг: ", "Заказчик: ", "Потребитель: ", "Установка: ", "Позиция: ",
-                                    "Модель привода: ", "Модель клапана: " , "Размер: DN " , "присоединение: PN " , "ХЗ1",
-                                    "ХЗ2", "ХЗ3" , "ХЗ4" , "ХЗ5" , "ХЗ6"   };
-            
-            Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(filename, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); //открыть файл
-            Excel.Worksheet ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1]; 
-            var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);
-            int asme = Convert.ToInt32(ObjWorkSheet.Cells[numberString, 9].Text.ToString());
-            int DN = Convert.ToInt32(ObjWorkSheet.Cells[numberString, 11].Text.ToString());
-            string form = ObjWorkSheet.Cells[numberString, 10].Text.ToString();
-            string[] priv = ObjWorkSheet.Cells[numberString, 18].Text.ToString().Split('/');
 
-            ram_par[1] += ObjWorkSheet.Cells[2, 3].Text.ToString();
-            ram_par[2] += ObjWorkSheet.Cells[3, 3].Text.ToString();
-            ram_par[3] += ObjWorkSheet.Cells[5, 3].Text.ToString();
-            ram_par[5] += ObjWorkSheet.Cells[numberString, 18].Text.ToString();
-            ram_par[6] += ObjWorkSheet.Cells[numberString, 4].Text.ToString();
-            ram_par[7] += ObjWorkSheet.Cells[numberString, 11].Text.ToString();
-            ram_par[8] += ObjWorkSheet.Cells[numberString, 8].Text.ToString();
-            string[] numberPartsExcel = ObjWorkSheet.Cells[numberString, 28].Text.ToString().Split(',');
-
-            int start = 1;
-            while(true)
-            {
-                if (ObjWorkSheet.Cells[start, 1].Text.ToString() == "ПРИНАДЛЕЖНОСТИ") break;
-                start++;
-            }
-            int fin = start;
-            while(true)
-            {
-                if (ObjWorkSheet.Cells[fin, 1].Text.ToString() == "") break;
-                fin++;
-            }
-
-            string frontParts = "";
-            string backParts = "";
-            string hand = "";
-            int mas = 0;
-            bool boolHand = false;
-            int numberStr = 1;
-            for(int i = start+1; i < fin; i++)
-            {
-                string rez = ObjWorkSheet.Cells[i, 1].Text.ToString();
-                while(ObjWorkSheet.Cells[i + 1, 1].Text.ToString().IndexOf((numberStr+1).ToString()+". ") != 0 && i < fin)
-                {
-                    i++;
-                    rez += " " + ObjWorkSheet.Cells[i, 1].Text.ToString().Replace("\"", "");
-                }
-                rez = rez.Substring(((numberStr).ToString() + ". ").Length);
-                if (Array.IndexOf(numberPartsExcel, numberStr.ToString()) != -1)
-                {
-                    string numberPart = getFrontPart(rez);
-                    if (numberPart != "0")
-                    {
-                        frontParts += numberPart + ";";
-                        mas += 5;
-                    }
-                    numberPart = getBackPart(rez);
-                    if (numberPart != "0")
-                    {
-                        backParts += numberPart + ";";
-                        mas += 5;
-                    }
-                    if( rez == handString)
-                    {
-                        hand = "5";
-                        boolHand = true;
-                    }
-                }
-                numberStr++;
-            }
-            ObjWorkBook.Close(false, Type.Missing, Type.Missing); 
-            ObjWorkExcel.Quit(); 
-            GC.Collect(); 
-            int[] values = { 20, 25, 40, 50, 80, 100, 150, 200 };
-            string parClap = getData(Array.IndexOf(values,DN),form.ToLower(),asme);
-            bool privPar = false;
-            if (priv[0] == "88") privPar = true;
-            ram_par[0] += (getWeight(Array.IndexOf(values, DN), asme)+getWeightPriv(Convert.ToInt32(priv[1]),boolHand) + mas).ToString();
-            string ram_par_str = "";
-            foreach (string i in ram_par)
-            {
-                ram_par_str += i + ";";
-            }
-            
-            ram_par_str.Trim(';');
-            string s = await RequestAsync(hand, parClap, ram_par_str, getDataPriv(Convert.ToInt32(priv[1]), privPar),backParts.Trim(';'),frontParts.Trim(';')) ;
-            MessageBox.Show(s);
-            
 
         }
-        private async Task<String> RequestAsync(string hand, string parClap , string ram_par, string priv_par,string backParts, string frontParts)
+        private async Task<String> RequestAsync(string filename, string hand, string parClap, string ram_par, string priv_par, string backParts, string frontParts)
         {
             string url = $"https://localhost:44394/Index?klap_par={parClap}&klap=Клапан&ram_par={ram_par}&priv_par={priv_par}&"
-                +$"backParts={backParts}&frontParts={frontParts}&hand={hand}";
+                + $"backParts={backParts}&frontParts={frontParts}&hand={hand}&filename={filename}";
             WebRequest request = WebRequest.Create(url);
             WebResponse response = await request.GetResponseAsync().ConfigureAwait(true);
             Stream stream = response.GetResponseStream();
@@ -212,7 +118,7 @@ namespace ClientClap
             string[][] dataMassCsvFile = getDataFromCSV(@"..\..\..\..\csvFiles\Priv.csv");
             int parSize = 2;
             if (par) parSize++;
-            return  $"∅{dataMassCsvFile[1 + nomberSize][1]};" +
+            return $"∅{dataMassCsvFile[1 + nomberSize][1]};" +
                     $"{dataMassCsvFile[1 + nomberSize][parSize]};" +
                     $"{dataMassCsvFile[1 + nomberSize][4]};" +
                     $"∅{dataMassCsvFile[1 + nomberSize][5]}";
@@ -225,7 +131,7 @@ namespace ClientClap
             string[][] dataMassCsvFile = getDataFromCSV(@"..\..\..\..\csvFiles\weightsDimen.csv");
             int parSize = 1;
             if (par) parSize++;
-            return Convert.ToInt32( dataMassCsvFile[nomberSize+1][parSize] );
+            return Convert.ToInt32(dataMassCsvFile[nomberSize + 1][parSize]);
 
         }
         public static int getWeight(int value, int class_asme)
@@ -268,39 +174,159 @@ namespace ClientClap
                 numberPurts.Add(dataMassCsvFileParts[i][1].Trim());
             }
             int a = Array.IndexOf(parts.ToArray(), Part);
-            if(a != -1) return numberPurts[a];
+            if (a != -1) return numberPurts[a];
             return "0";
+        }
+
+
+        private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            button2.Enabled = false;
+            if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
+                return;
+            filename = openFileDialog1.FileName;
+            Excel.Application ObjWorkExcel = new Excel.Application(); //открыть эксель
+            Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(filename, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); //открыть файл
+            Excel.Worksheet ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1];
+            int start = 14;
+            int fin = start;
+            while (true)
+            {
+                if (ObjWorkSheet.Cells[fin, 2].Text.ToString() == "") break;
+                listBox1.Items.Add(ObjWorkSheet.Cells[fin, 2].Text.ToString());
+                excelPar.Add("Модель клапана: " + ObjWorkSheet.Cells[fin, 4].Text.ToString() +
+                            "\nМодель привода: " + ObjWorkSheet.Cells[fin, 18].Text.ToString() +
+                            "\nКласс давления: " + ObjWorkSheet.Cells[fin, 8].Text.ToString() + "PN , " +
+                            ObjWorkSheet.Cells[fin, 9].Text.ToString() + " ASME" +
+                            "\nDN: " + ObjWorkSheet.Cells[fin, 11].Text.ToString());
+                fin++;
+            }
+            ObjWorkBook.Close(false, Type.Missing, Type.Missing);
+            ObjWorkExcel.Quit();
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            button2.Enabled = true;
+            label1.Text = excelPar[listBox1.SelectedIndex];
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            string[][] dataMassCsvFile = getDataFromCSV(@"..\..\..\..\csvFiles\artParts.csv");
-            string a = "Электромеханические конечные выключатели открыто-закрыто модели 496-257, взрывозащита 1ExdIICT6/T5, не ниже IP65 кабельный ввод под диаметр 9,4...14,0 мм с креплением под металлорукав Р3-Ц-20/Р3-ЦХ-20/Р3-ЦП-20/Р3-Ц-ПВХ-20/МПГ-20/МРПИ-20/Герда-МГ-20";
-            List<String> b = new List<String>();
-            for(int i = 0; i < dataMassCsvFile.Length; i++)
+            Excel.Application ObjWorkExcel = new Excel.Application(); //открыть эксель
+            Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(filename, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); //открыть файл
+            Excel.Worksheet ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1];
+            create_Arm(ObjWorkSheet, listBox1.SelectedIndex + 14, listBox1.Items[listBox1.SelectedIndex].ToString());
+            ObjWorkBook.Close(false, Type.Missing, Type.Missing);
+            ObjWorkExcel.Quit();
+        }
+        public async void create_Arm(Excel.Worksheet ObjWorkSheet, int numberString, string fileNameRezDvg)
+        {
+            string handString = "Ручной дублер";
+            string[] ram_par = {    "Масса, кг: ", "Заказчик: ", "Потребитель: ", "Установка: ", "Позиция: ",
+                                    "Модель привода: ", "Модель клапана: " , "Размер: DN " , "присоединение: PN " , "ХЗ1",
+                                    "ХЗ2", "ХЗ3" , "ХЗ4" , "ХЗ5" , "ХЗ6"   };
+
+            
+            var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);
+            int asme = Convert.ToInt32(ObjWorkSheet.Cells[numberString, 9].Text.ToString());
+            int DN = Convert.ToInt32(ObjWorkSheet.Cells[numberString, 11].Text.ToString());
+            string form = ObjWorkSheet.Cells[numberString, 10].Text.ToString();
+            string[] priv = ObjWorkSheet.Cells[numberString, 18].Text.ToString().Split('/');
+
+            ram_par[1] += ObjWorkSheet.Cells[2, 3].Text.ToString();
+            ram_par[2] += ObjWorkSheet.Cells[3, 3].Text.ToString();
+            ram_par[3] += ObjWorkSheet.Cells[5, 3].Text.ToString();
+            ram_par[4] += ObjWorkSheet.Cells[numberString, 2].Text.ToString();
+            ram_par[5] += ObjWorkSheet.Cells[numberString, 18].Text.ToString();
+            ram_par[6] += ObjWorkSheet.Cells[numberString, 4].Text.ToString();
+            ram_par[7] += ObjWorkSheet.Cells[numberString, 11].Text.ToString();
+            ram_par[8] += ObjWorkSheet.Cells[numberString, 8].Text.ToString();
+            string[] numberPartsExcel = ObjWorkSheet.Cells[numberString, 28].Text.ToString().Split(',');
+
+            int start = 1;
+            while (true)
             {
-                b.Add(dataMassCsvFile[i][0].Replace("\"", ""));
+                if (ObjWorkSheet.Cells[start, 1].Text.ToString() == "ПРИНАДЛЕЖНОСТИ") break;
+                start++;
+            }
+            int fin = start;
+            while (true)
+            {
+                if (ObjWorkSheet.Cells[fin, 1].Text.ToString() == "") break;
+                fin++;
             }
 
-            label1.Text = (Array.IndexOf(b.ToArray(), a)+1).ToString();
+            string frontParts = "";
+            string backParts = "";
+            string hand = "";
+            int mas = 0;
+            bool boolHand = false;
+            int numberStr = 1;
+            for (int i = start + 1; i < fin; i++)
+            {
+                string rez = ObjWorkSheet.Cells[i, 1].Text.ToString();
+                while (ObjWorkSheet.Cells[i + 1, 1].Text.ToString().IndexOf((numberStr + 1).ToString() + ". ") != 0 && i < fin)
+                {
+                    i++;
+                    rez += " " + ObjWorkSheet.Cells[i, 1].Text.ToString().Replace("\"", "");
+                }
+                rez = rez.Substring(((numberStr).ToString() + ". ").Length);
+                if (Array.IndexOf(numberPartsExcel, numberStr.ToString()) != -1)
+                {
+                    string numberPart = getFrontPart(rez);
+                    if (numberPart != "0")
+                    {
+                        frontParts += numberPart + ";";
+                        mas += 5;
+                    }
+                    numberPart = getBackPart(rez);
+                    if (numberPart != "0")
+                    {
+                        backParts += numberPart + ";";
+                        mas += 5;
+                    }
+                    if (rez == handString)
+                    {
+                        hand = "5";
+                        boolHand = true;
+                    }
+                }
+                numberStr++;
+            }
+            
+            GC.Collect();
+            int[] values = { 20, 25, 40, 50, 80, 100, 150, 200 };
+            string parClap = getData(Array.IndexOf(values, DN), form.ToLower(), asme);
+            bool privPar = false;
+            if (priv[0] == "88") privPar = true;
+            ram_par[0] += (getWeight(Array.IndexOf(values, DN), asme) + getWeightPriv(Convert.ToInt32(priv[1]), boolHand) + mas).ToString();
+            string ram_par_str = "";
+            foreach (string i in ram_par)
+            {
+                ram_par_str += i + ";";
+            }
+            ram_par_str.Trim(';');
+            string s = await RequestAsync(fileNameRezDvg, hand, parClap, ram_par_str, getDataPriv(Convert.ToInt32(priv[1]), privPar), backParts.Trim(';'), frontParts.Trim(';'));
+            MessageBox.Show(s);
         }
         /*
 private async void button1_Click(object sender, EventArgs e)
 {
-   string s = await RequestAsync();
-   MessageBox.Show(s);
+string s = await RequestAsync();
+MessageBox.Show(s);
 }
 private async Task<String> RequestAsync()
 {
-   string rez = "asf";
-   string url = "https://localhost:44394/Index?klap_par=25,35,15&klap=Клапан";
-   WebRequest request = WebRequest.Create(url);
-   WebResponse response = request.GetResponse();
-   Stream stream = response.GetResponseStream();
-   StreamReader reader = new StreamReader(stream);
-   response.Close();
-   rez = reader.ReadToEnd();
-   return rez;
+string rez = "asf";
+string url = "https://localhost:44394/Index?klap_par=25,35,15&klap=Клапан";
+WebRequest request = WebRequest.Create(url);
+WebResponse response = request.GetResponse();
+Stream stream = response.GetResponseStream();
+StreamReader reader = new StreamReader(stream);
+response.Close();
+rez = reader.ReadToEnd();
+return rez;
 }*/
     }
     
