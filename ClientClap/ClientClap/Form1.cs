@@ -182,6 +182,7 @@ namespace ClientClap
         private void открытьToolStripMenuItem_Click(object sender, EventArgs e)
         {
             button2.Enabled = false;
+            listBox1.Items.Clear();
             if (openFileDialog1.ShowDialog() == DialogResult.Cancel)
                 return;
             filename = openFileDialog1.FileName;
