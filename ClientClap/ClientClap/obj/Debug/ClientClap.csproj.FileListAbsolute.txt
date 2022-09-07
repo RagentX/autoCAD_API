@@ -58,3 +58,15 @@ C:\Users\user\Desktop\CAD-API\autoCAD_API\ClientClap\ClientClap\obj\Debug\Client
 C:\Users\user\Desktop\CAD-API\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.csproj.CoreCompileInputs.cache
 C:\Users\user\Desktop\CAD-API\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.exe
 C:\Users\user\Desktop\CAD-API\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.pdb
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\bin\Debug\ClientClap.exe.config
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\bin\Debug\ClientClap.exe
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\bin\Debug\ClientClap.pdb
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.csproj.AssemblyReference.cache
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.csproj.SuggestedBindingRedirects.cache
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.csproj.ResolveComReference.cache
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.Form1.resources
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.Properties.Resources.resources
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.csproj.GenerateResource.cache
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.csproj.CoreCompileInputs.cache
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.exe
+C:\Users\ICRP4003\Desktop\autoCAD\autoCAD_API\ClientClap\ClientClap\obj\Debug\ClientClap.pdb

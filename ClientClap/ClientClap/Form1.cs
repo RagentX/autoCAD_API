@@ -30,37 +30,47 @@ namespace ClientClap
         }
         private async Task<String> RequestAsync(string filename, string hand, string parClap, string ram_par, string priv_par, string backParts, string frontParts)
         {
-            string url = $"https://localhost:44394/Index?klap_par={parClap}&klap=Клапан&ram_par={ram_par}&priv_par={priv_par}&"
-                + $"backParts={backParts}&frontParts={frontParts}&hand={hand}&filename={filename}";
-            WebRequest request = WebRequest.Create(url);
-            WebResponse response = await request.GetResponseAsync().ConfigureAwait(true);
-            Stream stream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(stream);
-            return await reader.ReadToEndAsync();
+            StreamReader reader = null;
+            try
+            {
+                string url = $"https://localhost:44394/Index?klap_par={parClap}&klap=Клапан&ram_par={ram_par}&priv_par={priv_par}&"
+                    + $"backParts={backParts}&frontParts={frontParts}&hand={hand}&filename={filename}";
+                WebRequest request = WebRequest.Create(url);
+                WebResponse response = await request.GetResponseAsync().ConfigureAwait(true);
+                Stream stream = response.GetResponseStream();
+                reader = new StreamReader(stream);
+                return await reader.ReadToEndAsync();
+            } finally
+            {
+                reader.Close();
+            }
         }
 
 
         public static string[][] getDataFromCSV(string pathCsvFile)
         {
             List<string[]> data = new List<string[]>();
-            System.IO.StreamReader file = new System.IO.StreamReader(pathCsvFile);
-            string line;
-            while ((line = file.ReadLine()) != null)
+            using (System.IO.StreamReader file = new System.IO.StreamReader(pathCsvFile))
             {
-                String[] parts_of_line = line.Split(';');
-                string[] mass = new string[parts_of_line.Length];
-                for (int i = 0; i < parts_of_line.Length; i++)
+                string line;
+                while ((line = file.ReadLine()) != null)
                 {
-                    parts_of_line[i] = parts_of_line[i].Trim();
-                    mass[i] = parts_of_line[i];
+                    String[] parts_of_line = line.Split(';');
+                    string[] mass = new string[parts_of_line.Length];
+                    for (int i = 0; i < parts_of_line.Length; i++)
+                    {
+                        parts_of_line[i] = parts_of_line[i].Trim();
+                        mass[i] = parts_of_line[i];
+                    }
+                    data.Add(mass);
                 }
-                data.Add(mass);
-            }
 
-            return data.ToArray();
+                return data.ToArray();
+            }
         }
 
 
+        //todo remove unused wrapping
         public static string getData(int value, string form, int class_asme)
         {
             string[][] dataMassCsvFileA = getDataFromCSV(@"..\..\..\..\csvFiles\A.csv");
@@ -76,7 +86,7 @@ namespace ClientClap
                     Console.Write('\t');
 
                 }
-                Console.Write("\n");
+                Console.Write('\n');
             }
             Console.Write("\n\n\n");
 
@@ -109,7 +119,7 @@ namespace ClientClap
                     break;
                 }
             }
-            return $"{A.ToString()};{B.ToString()};{C.ToString()}";
+            return $"{A};{B};{C}";
         }
         public static string getDataPriv(int size, bool par)
         {
@@ -129,8 +139,7 @@ namespace ClientClap
             int[] sizes = new int[] { 6, 10, 16, 23 };
             int nomberSize = Array.IndexOf(sizes, size);
             string[][] dataMassCsvFile = getDataFromCSV(@"..\..\..\..\csvFiles\weightsDimen.csv");
-            int parSize = 1;
-            if (par) parSize++;
+            int parSize = par ? 2 : 1;
             return Convert.ToInt32(dataMassCsvFile[nomberSize + 1][parSize]);
 
         }
@@ -221,6 +230,8 @@ namespace ClientClap
             ObjWorkBook.Close(false, Type.Missing, Type.Missing);
             ObjWorkExcel.Quit();
         }
+
+        //todo StringBuilder
         public async void create_Arm(Excel.Worksheet ObjWorkSheet, int numberString, string fileNameRezDvg)
         {
             string handString = "Ручной дублер";
@@ -272,7 +283,7 @@ namespace ClientClap
                     i++;
                     rez += " " + ObjWorkSheet.Cells[i, 1].Text.ToString().Replace("\"", "");
                 }
-                rez = rez.Substring(((numberStr).ToString() + ". ").Length);
+                rez = rez.Substring(numberStr.ToString().Length + 2);
                 if (Array.IndexOf(numberPartsExcel, numberStr.ToString()) != -1)
                 {
                     string numberPart = getFrontPart(rez);
@@ -296,7 +307,10 @@ namespace ClientClap
                 numberStr++;
             }
             
+
+            //todo remove
             GC.Collect();
+
             int[] values = { 20, 25, 40, 50, 80, 100, 150, 200 };
             string parClap = getData(Array.IndexOf(values, DN), form.ToLower(), asme);
             bool privPar = false;
@@ -311,6 +325,7 @@ namespace ClientClap
             string s = await RequestAsync(fileNameRezDvg, hand, parClap, ram_par_str, getDataPriv(Convert.ToInt32(priv[1]), privPar), backParts.Trim(';'), frontParts.Trim(';'));
             MessageBox.Show(s);
         }
+
         /*
 private async void button1_Click(object sender, EventArgs e)
 {
@@ -325,10 +340,10 @@ WebRequest request = WebRequest.Create(url);
 WebResponse response = request.GetResponse();
 Stream stream = response.GetResponseStream();
 StreamReader reader = new StreamReader(stream);
-response.Close();
 rez = reader.ReadToEnd();
+response.Close();
 return rez;
 }*/
     }
-    
+
 }
