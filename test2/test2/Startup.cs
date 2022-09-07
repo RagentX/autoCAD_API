@@ -81,6 +81,9 @@ namespace test2
         {
             app.Use(async (context, next) =>
             {
+                // Послание для Димы
+                // В идеале вынести добавление блоков и прочие рутинные действия в отдельные функции, займусб этим завтра.
+
                 // Название клапана.
                 String name = null;
                 if (context.Request.Query.ContainsKey("klap"))
@@ -181,7 +184,7 @@ namespace test2
                         await context.Response.WriteAsync(frameParameters[i] + "<Br>");
                     }
 
-                    // Добавление блока, который отображает привод боку.
+                    // Добавление блока, который отображает привод сбоку.
                     AcadBlockReference acadBlockActuatorSideView = acadDoc.ModelSpace.InsertBlock(new double[] { 150, 150, 0 }, "Привод_сбоку",
                         _xScale, _yScale, _zScale, _rotate);
 
@@ -202,15 +205,15 @@ namespace test2
                         }
                     }
 
-                    // .
-                    if(backParts != null)
+                    // Добавление блока, который отображает навесное оборудывание на заднем фоне чертежа.
+                    if (backParts != null)
                         foreach (string i in backParts)
                         {
                             AcadBlockReference acadBlockBackPart = acadDoc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "part" + i,
                                 _xScale, _yScale, _zScale, _rotate);
                         }
 
-                    // .
+                    // Добавление блока, который отображает клапан на чертеже.
                     AcadBlockReference acadBlockValve = acadDoc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, name,
                         _xScale, _yScale, _zScale, _rotate); ;
                     object[] acadBlockValveAttributes = (object[])acadBlockValve.GetAttributes();
@@ -221,13 +224,13 @@ namespace test2
                         acadBlockValveAttribute.TextString = valveParameters[i];
                     }
 
-                    // .
+                    // Добавление блока, который отображает клапан ( вид слева ) на чертеже.
                     AcadBlockReference acadBlockValveSideView = acadDoc.ModelSpace.InsertBlock(new double[] { 150 , 150 , 0 }, "Клапан_слева",
                         _xScale, _yScale, _zScale, _rotate); ;
 
-                    // .
+                    // Добавление блока, который отображает привод на чертеже.
                     AcadBlockReference acadBlockAcruator = acadDoc.ModelSpace.InsertBlock(new double[] { 50, 150, 0 }, "Привод",
-                        _xScale, _yScale, _zScale, _rotate); ;
+                    _xScale, _yScale, _zScale, _rotate); ;
                     object[] acadBlockAcruatorAttributes = (object[])acadBlockAcruator.GetAttributes();
                     for (int i = 0; i < acadBlockAcruatorAttributes.Length; i++)
                     {
@@ -236,7 +239,7 @@ namespace test2
                         acadBlockAcruatorAttribute.TextString = actuatorParameters[i];
                     }
 
-                    // .
+                    // Добавление блока, который отображает навесное оборудывание на переднем фоне чертежа.
                     if (frontParts != null)
                         foreach (string i in frontParts)
                         {
@@ -244,7 +247,7 @@ namespace test2
                                 _xScale, _yScale, _zScale, _rotate); ;
                         }
 
-                    // .
+                    // Настройка параметров для вывода чертежа в формате PDF.
                     var acPlotCfg = acadDoc.PlotConfigurations;
                     acPlotCfg.Add("PDF", true);
                     AcadPlotConfiguration plotConfig = acPlotCfg.Item("PDF");
