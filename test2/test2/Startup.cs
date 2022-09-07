@@ -293,8 +293,8 @@ namespace test2
         ~Startup()
         {
             Console.WriteLine("qwqe");
-            if (acad != null)
-                acad.Quit();
+            if (acadApp != null)
+                acadApp.Quit();
             Console.WriteLine("131");
 
         }
